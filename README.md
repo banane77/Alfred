@@ -12,4 +12,6 @@ it will run as another instance if it's already running.
 
 if you want to filter the app list, just type `new` and the app name, such as `new appname` , it will show the apps which name contains `appname` in the list.
 
-It's very useful for people like me who need to open multiple app instances。
+It's very useful for people like me who need to open multiple app instances。  
+
+You can use the exported workflow file and change the keyword to what you like.
