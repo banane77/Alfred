@@ -1,0 +1,60 @@
+#!/bin/bash
+# this script is created by ChatGPT, you can optimize it
+
+# get filter parameter）
+query="$1"
+
+# set empty query if it is not set
+if [ -z "$query" ]; then
+  query=""
+fi
+
+# find all applications with the query in the name
+apps=$(find /Applications ~/Applications -iname "*$query*.app" -maxdepth 1)
+
+# create JSON output for Alfred
+echo '{"items": ['
+first=1
+while IFS= read -r app; do
+  # check path if it contains a space
+  app_name=$(basename "$app" .app)
+  app_escaped=$(echo "$app" | sed 's/"/\\"/g; s/\\/\\\\/g')  # 转义双引号和反斜杠
+
+  # read the icon file from the Info.plist
+  plist_path="$app/Contents/Info.plist"
+  icon_file=$(defaults read "$plist_path" CFBundleIconFile 2>/dev/null)
+
+  if [ -n "$icon_file" ]; then
+    if [[ "$icon_file" != *.icns ]]; then
+      icon_file="$icon_file.icns"
+    fi
+    icon_path="$app/Contents/Resources/$icon_file"
+  else
+    icon_path="$app/Contents/Resources/AppIcon.icns"
+    if [ ! -f "$icon_path" ]; then
+      icon_path="$app/Contents/Resources/icon.icns"
+    fi
+  fi
+
+  # output json
+  if [ $first -eq 0 ]; then
+    echo ','
+  fi
+  first=0
+
+  # output JSON
+  echo '  {'
+  echo '    "title": "'"$app_name"'",'
+  echo '    "subtitle": "'"$app_escaped"'",'
+  echo '    "arg": "'"$app_escaped"'"'
+
+  # add icon if it exists
+  if [ -f "$icon_path" ]; then
+    icon_escaped=$(echo "$icon_path" | sed 's/"/\\"/g; s/\\/\\\\/g')
+    echo '    ,"icon": { "path": "'"$icon_escaped"'" }'
+  fi
+
+  echo '  }'
+
+done <<< "$apps"
+echo ']}'

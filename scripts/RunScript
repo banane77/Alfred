@@ -1,0 +1,4 @@
+# so easy, just run open -n "$1" to open the file in a new window
+query=$1
+
+open -n "$1"
